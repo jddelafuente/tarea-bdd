@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+<h1>Bracket del Torneo</h1>
+
+<form method="GET">
+
+    <!-- 🎮 VIDEOJUEGO -->
+    <label>Videojuego:</label>
+    <select name="videojuego" onchange="this.form.submit()">
+        <option value="">Selecciona</option>
+        {% for juego in juegos %}
+            <option value="{{ juego[0] }}" {% if juego[0] == videojuego %}selected{% endif %}>
+                {{ juego[0] }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <br><br>
+
+    <!-- 🏆 TORNEO -->
+    {% if torneos %}
+    <label>Torneo:</label>
+    <select name="torneo_id" onchange="this.form.submit()">
+        <option value="">Selecciona</option>
+        {% for t in torneos %}
+            <option value="{{ t[0] }}" {% if t[0]|string == torneo_id %}selected{% endif %}>
+                {{ t[1] }}
+            </option>
+        {% endfor %}
+    </select>
+    {% endif %}
+
+</form>
+
+
+
+<div style="display: flex; gap: 50px;">
+    <div>
+        <h3>Fases de grupos</h3>
+        {% for partida in fase_de_grupos %}
+            <div style="margin-bottom: 10px;">
+                {{ partida[0] }} vs {{ partida[1] }}
+            </div>
+        {% endfor %}
+
+        <h3>Semifinal</h3>
+        {% for partida in semifinal %}
+            <div style="margin-bottom: 10px;">
+                {{ partida[0] }} vs {{ partida[1] }}
+            </div>
+        {% endfor %}
+
+        <h3>Final</h3>
+        {% for partida in final %}
+            <div style="margin-bottom: 10px;">
+                {{ partida[0] }} vs {{ partida[1] }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 💰 SPONSORS -->
+    <div>
+        <h3>Sponsors</h3>
+        <ul>
+            {% for sponsor in sponsors %}
+                <li>{{ sponsor[0] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+{% endblock %}

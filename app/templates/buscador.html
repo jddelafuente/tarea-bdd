@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+    <h1>Buscador del Sistema</h1>
+    <p>Utiliza los filtros para buscar jugadores o equipos en la base de datos.</p>
+    
+    <form action="/buscar" method="GET" style="background: #ecf0f1; padding: 15px; border-radius: 5px;">
+        
+        <label>Buscar por:</label>
+        <select name="tipo_filtro" onchange="this.form.submit()" required>
+            <option value="">Selecciona</option>
+            <option value="jugador" {% if tipo == 'jugador' %}selected{% endif %}>Jugador</option>
+            <option value="equipo" {% if tipo == 'equipo' %}selected{% endif %}>Equipo</option>
+        </select>
+
+        <br><br>
+
+        {% if tipo == 'jugador' %}
+            <input type="text" name="gamertag" placeholder="Gamertag" value="{{ gamertag or '' }}">
+            <input type="text" name="pais" placeholder="País" value="{{ pais or '' }}">
+        {% endif %}
+
+        {% if tipo == 'equipo' %}
+            <input type="text" name="nombre_equipo" placeholder="Nombre equipo" value="{{ nombre_equipo or '' }}">
+
+            <br><br>
+
+            <label>Fecha creación:</label>
+            <select name="operador_fecha">
+                <option value=">">Mayor que</option>
+                <option value="<">Menor que</option>
+                <option value="=">Igual</option>
+            </select>
+
+            <input type="date" name="fecha_creacion" value="{{ fecha_creacion or '' }}">
+        {% endif %}
+
+        <br><br>
+
+        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 5px 15px; cursor: pointer;">
+            Buscar
+        </button>
+    </form>
+
+    <hr>
+
+    <h3>Resultados:</h3>
+    
+    {% if resultados %}
+        <ul style="list-style-type: square;">
+            {% for fila in resultados %}
+                
+                {% if tipo == 'equipo' %}
+                    <li>
+                        <strong>Equipo:</strong> {{ fila[0] }}
+                        <span style="color: gray;">(Creación: {{ fila[1] }})</span>
+                    </li>
+                {% else %}
+                    <li>
+                        <strong> {{ fila[0] }}</strong> 
+                        - Nombre Real: {{ fila[1] }} ({{ fila[2] }})
+                    </li>
+                {% endif %}
+                
+            {% endfor %}
+        </ul>
+    
+    {% elif tipo %}
+        <p style="color: red; font-weight: bold;">No se encontraron resultados.</p>
+    {% else %}
+        <p style="color: gray;">Esperando consulta...</p>
+    {% endif %}
+
+{% endblock %}

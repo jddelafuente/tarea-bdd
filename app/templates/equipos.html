@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+    <h1>Listado Oficial de Equipos</h1>
+    <hr>
+    
+    <ul>
+        {% for equipo in equipos %}
+            <li style="margin-bottom: 10px;">
+                <strong>Nombre:</strong> {{ equipo[1] }} <br>
+                <small style="color: gray;">Fundado el: {{ equipo[2] }}</small>
+            </li>
+        {% else %}
+            <li>La base de datos está vacía. No hay equipos creados.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
