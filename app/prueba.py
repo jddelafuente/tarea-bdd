@@ -402,9 +402,11 @@ def pagina_estadisticas():
 
     #recibimos lo del html
     torneo_enviado = request.args.get("torneo_enviado")
-    
+    equipo_enviado = request.args.get("equipo_enviado")
     torneo_elegido = [] 
     datos_filtrados = []
+    equipos_del_torneo = []
+    datos_evolucion = []
     #sacamos lsos torneos de la base de datos
     cursor.execute("select torneo_id,nombre from torneos")
     torneo_elegido = cursor.fetchall() 
@@ -425,9 +427,26 @@ def pagina_estadisticas():
         join partidas p on est.partida_id = p.partida_id
         where p.torneo_id = %s
         GROUP BY j.gamertag, e.nombre
+        HAVING COUNT(DISTINCT p.partida_id) >= 2
         ORDER BY ratio DESC """,(torneo_enviado,))
 
         datos_filtrados = cursor.fetchall()
+
+        cursor.execute("""SELECT e.equipo_id, e.nombre
+                       FROM Inscripciones i, Equipos e
+                       WHERE i.equipo_id = e.equipo_id AND
+                       i.torneo_id = %s""", (torneo_enviado,))
+        equipos_del_torneo = cursor.fetchall()
+
+        if equipo_enviado:
+            equipo_enviado = int(equipo_enviado)
+            cursor.execute("""SELECT CASE WHEN p.fase = 'fase de grupos' THEN 'Fase de Grupos'
+                           ELSE 'Fases Eliminatorias' END AS tipo_fase, ROUND(AVG(est.kos), 2) AS avg_kos, ROUND(AVG(est.restarts), 2) AS avg_restarts,
+                           ROUND(AVG(est.assists), 2) AS avg_assists FROM Estadisticas_Jugadores est, Partidas p, Jugadores j
+                           WHERE est.partida_id = p.partida_id AND est.jugador_id = j.jugador_id AND p.torneo_id = %s AND j.equipo_id = %s 
+                           GROUP BY tipo_fase
+                           ORDER BY tipo_fase DESC;""", (torneo_enviado, equipo_enviado))
+            datos_evolucion = cursor.fetchall()
     print("RESULTADOS:", datos_filtrados)
     print("RESULTADOS:", datos_filtrados)
     print("RESULTADOS:", datos_filtrados)
@@ -440,7 +459,10 @@ def pagina_estadisticas():
         "estadisticas.html",
         torneo_elegido = torneo_elegido,
         torneo_enviado = torneo_enviado,
-        datos_filtrados = datos_filtrados) 
+        datos_filtrados = datos_filtrados,
+        equipos_del_torneo = equipos_del_torneo,
+        equipo_enviado = equipo_enviado,
+        datos_evolucion = datos_evolucion) 
 
     
 

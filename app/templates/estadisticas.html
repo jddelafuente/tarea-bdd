@@ -49,5 +49,50 @@
         <p style="color: gray;">No hay estadísticas para este torneo.</p>
     {% endif %}
 </div>
+{% if torneo_enviado %}
+<div style="margin-top: 40px; margin-bottom: 40px;">
+    <h3>Evolución por Fase</h3>
 
-    {% endblock %}
+    {% if equipos_del_torneo %}
+    <form method="GET" style="margin-bottom: 15px;">
+        <input type="hidden" name = "torneo_enviado" value="{{ torneo_enviado }}">
+        <label>Equipo:</label>
+        <select name = "equipo_enviado" onchange="this.form.submit()">
+            <option value = "">Selecciona un equipo</option>
+            {% for equipo in equipos_del_torneo %}
+            <option value = "{{ equipo[0] }}" {% if equipo[0]|string == equipo_enviado|string %}selected{% endif %}>
+                {{ equipo[1] }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+
+    {% if equipo_enviado and datos_evolucion %}
+    <table style="border-collapse: collapse; width: 100%; text-align: center;">
+        <thead style="background-color: #2c3e50; color: white";>
+            <tr>
+                <th style="padding: 10px;">Fase del Torneo</th>
+                <th>Promedio KOs</th>
+                <th>Promedio Restarts</th>
+                <th>Promedio Assists</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fase in datos_evolucion %}
+            <tr style ="border-bottom: 1px solid #ddd;">
+                <td style = "padding: 8px;">{{ fase[0] }}</td>
+                <td>{{ fase[1] }}</td>
+                <td>{{ fase[2] }}</td>
+                <td>{{ fase[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody> 
+    </table>
+    {% elif equipo_enviado %}
+    <p style="color: gray;">No hay estadisticas registradas</p>
+    {% else %}
+    <p style = "color: gray;">Selecciona un equipo para ver sus estadisticas</p>
+    {% endif %}
+
+    </div>{% endif %}{% endblock %}
