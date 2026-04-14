@@ -25,7 +25,7 @@ CREATE TABLE Jugadores (
     fecha_nacimiento DATE NOT NULL,
     pais_origen VARCHAR(100) NOT NULL,
     equipo_id INT NOT NULL,
-    es_capitan BOOLEAN DEFAULT FALSE, -- Solución instantánea sin usar ALTER TABLE
+    es_capitan BOOLEAN DEFAULT 
     FOREIGN KEY (equipo_id) REFERENCES Equipos(equipo_id));
 
 CREATE TABLE Inscripciones (
