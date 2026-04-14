@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+<h1>Torneos</h1>
+
+<form method="GET">
+    <div class="form-group">
+        <label>Torneo:</label>
+        <select name="id_torneo" onchange="this.form.submit()">
+            <option value="">Selecciona Torneo</option>
+            {% for t in lista_torneos %}
+                <option value="{{ t[0] }}" {% if t[0]|string == id_torneo %}selected{% endif %}>
+                    {{ t[1] }} ({{ t[2] }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+
+{% if id_torneo %}
+<div style="display: flex; gap: 70px; flex-wrap: wrap;">
+    <div>
+        <h3>Tabla de Posiciones (Fase de Grupos)</h3>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>Equipo</th>
+                <th>PJ</th>
+                <th>PG</th>
+                <th>PE</th>
+                <th>PP</th>
+                <th>Puntos</th>
+            </tr>
+            {% for pos in posiciones %}
+            <tr>
+                <td>{{ pos[0] }}</td>
+                <td>{{ pos[1] }}</td>
+                <td>{{ pos[2] }}</td>
+                <td>{{ pos[3] }}</td>
+                <td>{{ pos[4] }}</td>
+                <td><strong>{{ pos[5] }}</strong></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div>
+        <h3>Partidas</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            {% for p in partidas %}
+                <li>{{ p[0] }} <strong>{{ p[2] }} - {{ p[3] }}</strong> {{ p[1] }} ({{ p[4] }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h3>Equipos Inscritos</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            {% for e in equipos_inscritos %}
+                <li>{{ e[0] }} (Grupo {{ e[1] }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h3>Sponsors</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            {% for s in sponsors %}
+                <li>{{ s[0] }} ({{ s[1] }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

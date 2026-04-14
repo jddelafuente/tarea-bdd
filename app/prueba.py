@@ -212,6 +212,89 @@ def pagina_estadisticas():
         id_partida = id_partida) 
 
 
+@app.route("/torneos")
+def pagina_torneos():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    id_torneo = request.args.get("id_torneo")
+    
+    lista_torneos = []
+    posiciones = []
+    partidas = []
+    equipos_inscritos = []
+    sponsors = []
+
+    cursor.execute("SELECT torneo_id, nombre, videojuego FROM torneos")
+    lista_torneos = cursor.fetchall()
+
+
+
+    # primer SUM  CUENTA LOS GANADOS
+    # segundo SUM CUENTA LOS EMPATES
+    # tercer SUM CUENTA LAS DERROTAS
+    # cuarto SUM calcula los puntos totales
+    #Con el JOIN agarramos las partidas donde el equipo sea A o B
+    # el Where para filtrar un torneo especifico y solo la fase de grupos
+    # el group by para agrupar por equipo para usar COUNT y SUM
+    #  Order By para ordenar las columas de la mayor a la menos (para abajo)
+    if id_torneo:
+        cursor.execute("""
+            SELECT e.nombre,
+            COUNT(p.partida_id),
+            SUM(CASE WHEN (p.equipo_a_id = e.equipo_id AND p.puntaje_a > p.puntaje_b) OR (p.equipo_b_id = e.equipo_id AND p.puntaje_b > p.puntaje_a) THEN 1 ELSE 0 END),
+            SUM(CASE WHEN p.puntaje_a = p.puntaje_b THEN 1 ELSE 0 END),
+            SUM(CASE WHEN (p.equipo_a_id = e.equipo_id AND p.puntaje_a < p.puntaje_b) OR (p.equipo_b_id = e.equipo_id AND p.puntaje_b < p.puntaje_a) THEN 1 ELSE 0 END),
+            SUM(CASE WHEN (p.equipo_a_id = e.equipo_id AND p.puntaje_a > p.puntaje_b) OR (p.equipo_b_id = e.equipo_id AND p.puntaje_b > p.puntaje_a) THEN 3 WHEN p.puntaje_a = p.puntaje_b THEN 1 ELSE 0 END)
+            FROM equipos e
+            JOIN partidas p ON e.equipo_id = p.equipo_a_id OR e.equipo_id = p.equipo_b_id
+            WHERE p.torneo_id = %s AND p.fase = 'fase de grupos'
+            GROUP BY e.equipo_id, e.nombre
+            ORDER BY 6 DESC
+        """, (id_torneo,))
+        posiciones = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT ea.nombre, eb.nombre, p.puntaje_a, p.puntaje_b, p.fase
+            FROM partidas p
+            JOIN equipos ea ON p.equipo_a_id = ea.equipo_id
+            JOIN equipos eb ON p.equipo_b_id = eb.equipo_id
+            WHERE p.torneo_id = %s
+        """, (id_torneo,))
+        partidas = cursor.fetchall()
+
+
+
+        cursor.execute("""
+            SELECT e.nombre, i.grupo
+            FROM equipos e
+            JOIN inscripciones i ON e.equipo_id = i.equipo_id
+            WHERE i.torneo_id = %s
+        """, (id_torneo,))
+        equipos_inscritos = cursor.fetchall()
+
+
+        
+        cursor.execute("""
+            SELECT s.nombre, s.industria
+            FROM sponsors s
+            JOIN patrocinios p ON s.sponsor_id = p.sponsor_id
+            WHERE p.torneo_id = %s
+        """, (id_torneo,))
+        sponsors = cursor.fetchall()
+
+    cursor.close()
+    conexion.close()
+
+    return render_template(
+        "torneos.html",
+        lista_torneos=lista_torneos,
+        id_torneo=id_torneo,
+        posiciones=posiciones,
+        partidas=partidas,
+        equipos_inscritos=equipos_inscritos,
+        sponsors=sponsors
+    )
+
 
 if __name__ == "__main__":
     print("Iniciando el servidor en http://localhost:5000 ...")
