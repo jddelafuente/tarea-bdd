@@ -5,7 +5,6 @@
 
 <form method="GET">
 
-    <!-- 🎮 VIDEOJUEGO -->
     <label>Videojuego:</label>
     <select name="videojuego" onchange="this.form.submit()">
         <option value="">Selecciona</option>
@@ -18,7 +17,6 @@
 
     <br><br>
 
-    <!-- 🏆 TORNEO -->
     {% if torneos %}
     <label>Torneo:</label>
     <select name="torneo_id" onchange="this.form.submit()">
@@ -34,32 +32,33 @@
 </form>
 
 
-
-<div style="display: flex; gap: 50px;">
+<div style="display: flex; gap: 100px;">
     <div>
         <h3>Fases de grupos</h3>
         {% for partida in fase_de_grupos %}
             <div style="margin-bottom: 10px;">
-                {{ partida[0] }} vs {{ partida[1] }}
+                Partida {{partida[0]}}: {{ partida[1] }} vs {{ partida[2] }} ({{partida[3]}} - {{partida[4]}})
             </div>
         {% endfor %}
-
+    </div>
+    <div>
         <h3>Semifinal</h3>
         {% for partida in semifinal %}
             <div style="margin-bottom: 10px;">
-                {{ partida[0] }} vs {{ partida[1] }}
+                Partida {{partida[0]}}: {{ partida[1] }} vs {{ partida[2] }} ({{partida[3]}} - {{partida[4]}})
             </div>
         {% endfor %}
-
+    </div>
+    <div>
         <h3>Final</h3>
         {% for partida in final %}
             <div style="margin-bottom: 10px;">
-                {{ partida[0] }} vs {{ partida[1] }}
+                Partida {{partida[0]}}: {{ partida[1] }} vs {{ partida[2] }} ({{partida[3]}} - {{partida[4]}})
             </div>
         {% endfor %}
     </div>
 
-    <!-- 💰 SPONSORS -->
+    <!--  SPONSORS -->
     <div>
         <h3>Sponsors</h3>
         <ul>
@@ -69,6 +68,5 @@
         </ul>
     </div>
 
-</div>
 
 {% endblock %}

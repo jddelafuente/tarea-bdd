@@ -26,7 +26,7 @@
             <br><br>
 
             <label>Fecha creación:</label>
-            <select name="operador_fecha">
+            <select name="operador_mmi">
                 <option value=">">Mayor que</option>
                 <option value="<">Menor que</option>
                 <option value="=">Igual</option>
@@ -52,8 +52,8 @@
                 
                 {% if tipo == 'equipo' %}
                     <li>
-                        <strong>Equipo:</strong> {{ fila[0] }}
-                        <span style="color: gray;">(Creación: {{ fila[1] }})</span>
+                        <strong>Equipo:</strong> {{ fila[0] }} 
+                        <span style="color: gray;">(Creación: {{ fila[1] }}) 👑 Capitan: {{fila[2]}}  </span> 
                     </li>
                 {% else %}
                     <li>

@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block contenido %}
+<h1>Datos de Jugadores</h1>
+
+<form method="GET">
+
+    <label>Equipo:</label>
+    <select name="eq" onchange="this.form.submit()">
+        <option value="">Selecciona Equipo </option>
+        {% for Equipo in equipos_inicio %}
+            <option value="{{ Equipo[0] }}" {% if Equipo[0] == eq %}selected{% endif %}>
+                {{ Equipo[0] }}
+            </option>
+        {% endfor %}
+    </select>
+    
+    <br><br>
+    {% if lista_jugadores %}
+    <label>Jugador:</label>
+    <select name="estadisticas_jugador" onchange="this.form.submit()">
+        <option value="">Selecciona Jugador</option>
+        {% for jugador in lista_jugadores %}
+            <option value="{{ jugador[0] }}" {% if jugador[0]|string == jugador_elegido %}selected{% endif %}>
+                {{ jugador[0] }}
+            </option>
+        {% endfor %}
+    </select>
+   {% endif %}
+    <br><br>
+    {% if lista_torneos %}
+    <label>Torneo:</label>
+    <select name="nombre_torneo" onchange="this.form.submit()">
+        <option value="">Selecciona Torneo</option>
+        {% for torneo in lista_torneos %}
+            <option value="{{ torneo[0] }}" {% if torneo[0]|string == nombre_torneo %}selected{% endif %}>
+                {{ torneo[0] }}
+            </option>
+        {% endfor %}
+    </select>
+    {% endif %}
+    <br><br>
+    {% if lista_partidas %}
+    <label>Partida:</label>
+    <select name="id_partida" onchange="this.form.submit()">
+        <option value="">Selecciona</option>
+        {% for partida in lista_partidas %}
+            <option value="{{ partida[0] }}" {% if partida[0]|string == id_partida %}selected{% endif %}>
+                {{ partida[0] }}
+            </option>
+        {% endfor %}
+    </select>
+    {% endif %}
+
+    
+
+</form>
+
+<div style="display: flex; gap: 100px;">
+    <div>
+        <h3>Jugador</h3>
+        {% for datos in mostrar %}
+            <ul style="list-style-type: none; padding: 0; line-height: 1.8;">
+                <li><strong>Nombre:</strong> {{ datos[1] }}</li>
+                <li><strong>Gamertag:</strong> {{ datos[0] }}</li>
+                <li><strong>Nacionalidad:</strong> {{ datos[4] }}</li>
+                <li><strong>Fecha de nacimiento:</strong> {{ datos[3] }}</li>
+                <li><strong>Email:</strong> {{ datos[2] }}</li>
+            </ul>
+        {% endfor %}
+    </div>
+
+
+
+    <div>
+    <h3>Estadísticas de la Partida</h3>
+        {% for datos in mostrar %}
+                <li><strong>KOs (Eliminaciones):</strong> {{ datos[5] }}</li>
+                <li><strong>Restarts (Muertes):</strong> {{ datos[6] }}</li>
+                <li><strong>Asistencias:</strong> {{ datos[7] }}</li>
+            </ul>
+        {% endfor %}
+    </div>
+
+
+
+{% endblock %}
