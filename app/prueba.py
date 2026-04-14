@@ -68,7 +68,7 @@ def pagina_buscar():
     cursor = conexion.cursor()
 
     if tipo == "jugador":
-        consulta = "SELECT e.NOMBRE, e.FECHA_CREACION, j.gamertag  FROM EQUIPOS e JOIN JUGADORES j on e.equipo_id = j.equipo_id where es_capitan = true"
+        consulta = "SELECT j.gamertag, j.nombre_real, j.pais_origen, j.email, j.fecha_nacimiento FROM jugadores j WHERE true "
         parametros = []
         if gamertag:
             consulta += " AND gamertag ILIKE %s"
@@ -80,10 +80,10 @@ def pagina_buscar():
         resultados = cursor.fetchall()
 
     elif tipo == "equipo":
-        consulta = "SELECT e.NOMBRE, e.FECHA_CREACION, j.gamertag  FROM EQUIPOS e JOIN JUGADORES j on e.equipo_id = j.equipo_id where es_capitan = true "
+        consulta = "SELECT e.NOMBRE, e.FECHA_CREACION, j.gamertag FROM EQUIPOS e JOIN JUGADORES j on e.equipo_id = j.equipo_id WHERE j.es_capitan = true "
         parametros = []
         if nombre_equipo:
-            consulta += " AND nombre ILIKE %s"
+            consulta += " AND e.nombre ILIKE %s"
             parametros.append(f"%{nombre_equipo}%")
         if fecha_creacion:
             consulta += f" AND fecha_creacion {operador} %s"
@@ -155,8 +155,8 @@ def pagina_bracket():
         final=final,
         sponsors=sponsors)
 
-@app.route("/estadisticas")
-def pagina_estadisticas():
+@app.route("/estadisticas2")
+def pagina_estadisticas2():
     conexion = obtener_conexion()
     cursor = conexion.cursor()
 
@@ -193,7 +193,7 @@ def pagina_estadisticas():
         lista_partidas = cursor.fetchall()
 
     if id_partida:
-        # fase de grupos
+        # datos por partida
         cursor.execute("SELECT j.gamertag, j.nombre_real, j.email, j.fecha_nacimiento, j.pais_origen, ej.kos, ej.restarts, ej.assists FROM Jugadores j JOIN Estadisticas_Jugadores ej ON j.jugador_id = ej.jugador_id WHERE ej.partida_id = %s AND j.gamertag = %s", (id_partida, jugador_elegido))
         mostrar = cursor.fetchall()
 
@@ -201,7 +201,7 @@ def pagina_estadisticas():
     conexion.close()
 
     return render_template(
-        "estadisticas.html",
+        "estadisticas2.html",
         equipos_inicio = equipos_inicio,
         lista_jugadores = lista_jugadores,
         lista_torneos = lista_torneos,
@@ -392,10 +392,58 @@ def pagina_torneos():
         posiciones=posiciones,
         partidas=partidas,
         equipos_inscritos=equipos_inscritos,
-        sponsors=sponsors
-    )
+        sponsors=sponsors)
 
+
+@app.route("/estadisticas")
+def pagina_estadisticas():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    #recibimos lo del html
+    torneo_enviado = request.args.get("torneo_enviado")
+    
+    torneo_elegido = [] 
+    datos_filtrados = []
+    #sacamos lsos torneos de la base de datos
+    cursor.execute("select torneo_id,nombre from torneos")
+    torneo_elegido = cursor.fetchall() 
+
+    print(type(torneo_enviado), torneo_enviado)
+    print(type(torneo_enviado), torneo_enviado)
+    print(type(torneo_enviado), torneo_enviado)
+    print(type(torneo_enviado), torneo_enviado)
+    print(type(torneo_enviado), torneo_enviado)
+    print(type(torneo_enviado), torneo_enviado)
+
+    if torneo_enviado:
+        torneo_enviado = int(torneo_enviado)
+        cursor.execute("""select j.gamertag, e.nombre, SUM (est.kos), SUM (est.restarts), SUM (est.assists), round(SUM(est.kos) * 1.0 / NULLIF(SUM(est.restarts), 0), 2) as ratio
+        from estadisticas_jugadores est
+        JOIN jugadores j on est.jugador_id = j.jugador_id
+        join equipos e on j.equipo_id = e.equipo_id
+        join partidas p on est.partida_id = p.partida_id
+        where p.torneo_id = %s
+        GROUP BY j.gamertag, e.nombre
+        ORDER BY ratio DESC """,(torneo_enviado,))
+
+        datos_filtrados = cursor.fetchall()
+    print("RESULTADOS:", datos_filtrados)
+    print("RESULTADOS:", datos_filtrados)
+    print("RESULTADOS:", datos_filtrados)
+    print("RESULTADOS:", datos_filtrados)
+
+    cursor.close()
+    conexion.close()
+
+    return render_template(
+        "estadisticas.html",
+        torneo_elegido = torneo_elegido,
+        torneo_enviado = torneo_enviado,
+        datos_filtrados = datos_filtrados) 
+
+    
 
 if __name__ == "__main__":
-    print("Iniciando el servidor en http://localhost:5000 ...")
+    print("Iniciando el servidor en http://localhost:5000")
     app.run(debug=True)
