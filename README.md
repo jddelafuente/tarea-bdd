@@ -51,6 +51,12 @@ WHERE videojuego = 'Valorant'
 
 - Como explicamos en el Informe, nuestro esquema para tener al capitan de un equipo es que jugadores tienen una columna extra con valor booleano para saber si un jugador es capitan de un equipo, la tarea no lo exige pero en caso de tener que controlar eso lo hariamos del backend. tener consideracion de esto en caso de agregar data.
 
+- en la parte de requerimientos del cliente dice :
+    Las fases posibles son: fase de grupos, cuartos de final, semifinal,
+    final. El formato del torneo es: 8 equipos divididos en 2 grupos de 4, round-robin dentro de cada grupo, los 2 mejores de cada grupo avanzan a semifinales, luego final.
+ esto es contradictorio debido a que jamas podemos llegar a cuartos de final si solo tenemos dos grupos (para llegar a cuartos necesitariamos 4 grupos y el enunciado dice que solo trabajemos con 2 "El formato del torneo es: 8 equipos divididos en 2 grupos de 4"). Nuestra desicion de diseño fue mantener la fase en el dominio del esquema (cuartos) por si en algun contexto especifico (los 4 ganadores anteriores estan automaticamente en cuartos de final, por ejemplo) o algun razonamiento diferente tenemos cuartos de final de todos modos.
+ 
+
 
 
 
