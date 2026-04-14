@@ -2,9 +2,43 @@
 
 {% block contenido %}
     <h1>Sponsors</h1>
-    <ul>
-    {% for equipo in equipos %}
-        <li><strong>{{ equipo[1] }}</strong> - Creado el: {{ equipo[2] }}</li>
+
+   <form method = "GET" action ="/sponsors">
+    <label>Videojuego:</label>
+    <select name="videojuego" onchange="this.form.submit()">
+    <option value="">-- Elige un juego --</option> {% for juego in juegos %}
+    <option value="{{ juego[0] }}" {% if juego[0] == videojuego_selected %}selected{% endif %}>
+        {{ juego[0] }}
+    </option>
     {% endfor %}
-    </ul>
+</select>
+   </form>
+   <br>
+
+   {% if videojuego_selected %}
+   <h2>Resultados para: {{ videojuego_selected }}</h2>
+   {% if sponsors %}
+   <table border ="1">
+    <thead>
+        <tr>
+            <th>Sponsor</th>
+            <th>Industria</th>
+            <th>Monto total (USD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sponsor in sponsors %}
+        <tr>
+           <td>{{ sponsor[0] }}</td>
+           <td>{{ sponsor[1] }}</td>
+           <td>${{  "{:,.0f}".format(sponsor[2]) }}</td> 
+        </tr>
+        {% endfor %}
+    </tbody>
+   </table>  
+   {% else %}
+   <p>Ningun sponsor ha auspiciado este videojuego en todos los torneos</p>
+   {% endif %}
+{% endif %}
+
 {% endblock %}

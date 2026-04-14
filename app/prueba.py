@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash, url_for, redirect
 import psycopg2
 
 app = Flask(__name__)
+app.secret_key = "clave-secreta-tarea"
 
 def obtener_conexion():
     """Abre la conexión a la base de datos Tarea1"""
-    return psycopg2.connect(database="Tarea1", user="postgres", password="postgres", host="localhost", port="5432")
+    return psycopg2.connect(database="tarea1", user="postgres", password="postgres", host="localhost", port="5432")
 
 def obtener_equipos():
     conexion = obtener_conexion()
@@ -211,6 +212,105 @@ def pagina_estadisticas():
         nombre_torneo = nombre_torneo,
         id_partida = id_partida) 
 
+
+@app.route("/inscribirse", methods = ["GET", "POST"])
+def pagina_inscribirse():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    #obtengo torneos
+    cursor.execute("SELECT torneo_id, nombre, max_equipos FROM Torneos ORDER BY torneo_id")
+    torneos = cursor.fetchall()
+    #obtengo equipos
+    cursor.execute("SELECT equipo_id, nombre FROM Equipos ORDER BY nombre")
+    equipos = cursor.fetchall()
+
+    if request.method == "POST":
+        torneo_id = request.form.get("torneo_id")
+        equipo_id = request.form.get("equipo_id")
+
+        if not torneo_id or not equipo_id:
+            flash("Debes seleccionar un torneo y un equipo.")
+            cursor.close()
+            conexion.close()
+            return render_template("inscribirse.html", torneos = torneos, equipos=equipos)
+        
+        try:
+            #1. Verificar equipos ya inscritos en el torneo
+            cursor.execute("SELECT COUNT(*) FROM Inscripciones WHERE torneo_id = %s", (torneo_id,))
+            inscritos = cursor.fetchone()[0]
+            #2 obtener el max de equipos
+            cursor.execute("SELECT max_equipos FROM Torneos WHERE torneo_id = %s", (torneo_id,))
+            resultado_max_equipos = cursor.fetchone()
+
+            if resultado_max_equipos is None:
+                flash("El torneo no existe")
+                cursor.close()
+                conexion.close()
+                return render_template("inscribirse.html", torneos = torneos, equipos=equipos)
+            
+            max_equipos = resultado_max_equipos[0]
+
+            #3 Verificar si el equipo ya esta en el torneo
+            cursor.execute("SELECT COUNT(*) FROM Inscripciones WHERE torneo_id = %s AND equipo_id = %s", (torneo_id, equipo_id))
+            esta_inscrito = cursor.fetchone()[0]
+
+            if esta_inscrito > 0:
+                flash("Equipo ya inscrito en el torneo")
+                cursor.close()
+                conexion.close()
+                return render_template("inscribirse.html", torneos = torneos, equipos=equipos)
+            
+            if inscritos >= max_equipos:
+                flash("No se puede inscribir el equipo. Torneo lleno")
+                cursor.close()
+                conexion.close()
+                return render_template("inscribirse.html", torneos = torneos, equipos=equipos)
+            
+            #si pasa todos los filtros se puede inscribir el equipo en la bdd
+            cursor.execute("INSERT INTO Inscripciones(torneo_id, equipo_id) VALUES (%s, %s)", (torneo_id, equipo_id)
+                           )
+            
+            conexion.commit()
+            flash("Inscrito correctamente")
+            cursor.close()
+            conexion.close()
+            return redirect(url_for("pagina_inscribirse"))
+        
+        except Exception as e:
+            conexion.rollback()
+            flash(f"Error al inscribir {e}")
+    cursor.close()
+    conexion.close()
+    return render_template("inscribirse.html", torneos = torneos, equipos=equipos)
+
+
+@app.route("/sponsors")
+def pagina_sponsors():
+    conexion = obtener_conexion()
+    cursor= conexion.cursor()
+
+    videojuego_selected = request.args.get("videojuego")
+    cursor.execute("SELECT DISTINCT videojuego FROM Torneos")
+    juegos = cursor.fetchall()
+
+    sponsors = []
+    if videojuego_selected:
+        #division
+        consulta = """ SELECT s.nombre, s.industria, SUM(p.monto_usd) AS monto_total
+        FROM Sponsors s, Patrocinios p, Torneos t
+        WHERE s.sponsor_id = p.sponsor_id AND p.torneo_id = t.torneo_id
+        AND t.videojuego = %s
+        GROUP BY s.sponsor_id, s.nombre, s.industria
+        HAVING COUNT(DISTINCT t.torneo_id) = (SELECT COUNT(*) FROM Torneos WHERE videojuego = %s)
+        ORDER BY monto_total DESC;"""
+        cursor.execute(consulta, (videojuego_selected, videojuego_selected))
+        sponsors = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+
+    return render_template(
+        "sponsors.html", juegos=juegos, videojuego_selected=videojuego_selected, sponsors=sponsors
+    )
 
 @app.route("/torneos")
 def pagina_torneos():

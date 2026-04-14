@@ -2,9 +2,39 @@
 
 {% block contenido %}
     <h1>INSCRIBETE CON TU EQUIPO</h1>
+    {% set mensajes = get_flashed_messages()%}
+    {% if mensajes %}
     <ul>
-    {% for equipo in equipos %}
-        <li><strong>{{ equipo[1] }}</strong> - Creado el: {{ equipo[2] }}</li>
+        {% for mensaje in mensajes %}
+        <li>{{mensaje}}</li>
     {% endfor %}
     </ul>
+    {% endif %}
+    <form method ="POST">
+        <label>Torneo: </label> <br>
+         <select name = "torneo_id" required>
+            <option value ="">Seleccione un torneo</option>
+            {% for torneo in torneos %}
+            <option value = "{{ torneo[0] }}">
+                {{ torneo[1] }} 
+            </option>
+            {% endfor %}
+         </select>
+         <br><br>
+
+         <label>Equipo:</label>
+         <select name ="equipo_id" required>
+            <option value="">Seleccione un equipo</option>
+            {% for equipo in equipos %}
+            <option value = "{{ equipo[0] }}">
+                {{ equipo[1] }}
+            </option>
+            {% endfor %}
+         </select>
+         <br><br>
+         
+         <button type="submit">Inscribir</button>  
+ 
+
+    </form>  
 {% endblock %}
