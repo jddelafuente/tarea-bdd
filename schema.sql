@@ -64,7 +64,7 @@ CREATE TABLE Estadisticas_Jugadores (
 CREATE TABLE Patrocinios (
     sponsor_id INT NOT NULL,
     torneo_id INT NOT NULL,
-    monto_usd INT NOT NULL, -- Reemplazo de DECIMAL por INT
+    monto_usd INT NOT NULL,
     PRIMARY KEY (sponsor_id, torneo_id),
     FOREIGN KEY (sponsor_id) REFERENCES Sponsors(sponsor_id),
     FOREIGN KEY (torneo_id) REFERENCES Torneos(torneo_id));
